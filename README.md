@@ -28,8 +28,8 @@ A robust and premium Node.js integration for Safaricom's **Daraja API (MPESA)**.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/masangakevin256/Daraja-API-MPESA-.git
-   cd Daraja-API-MPESA-
+   git clone https://github.com/masangakevin256/Daraja-API-MPESA.git
+   cd Daraja-API-MPESA
    ```
 
 2. **Install dependencies:**
