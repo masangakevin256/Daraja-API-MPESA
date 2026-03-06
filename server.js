@@ -141,39 +141,39 @@ app.post("/api/mpesa/callback", (req, res) => {
   res.status(200).json({ ResultCode: 0, ResultDesc: "Accepted" });
 });
 //B2C ROUTE OR AUTO-WITHDRAWAL
-app.get("/b2c/url_request", async(req,res) => {
+app.get("/b2c/url_request", async (req, res) => {
   getAccessToken()
     .then((accessToken) => {
-        const securityCredential = process.env.MPESA_SECURITY_CREDENTIALS;
-        const url = "https://sandbox.safaricom.co.ke/mpesa/b2c/v3/paymentrequest";
-        const auth = "Bearer " + accessToken;
+      const securityCredential = process.env.MPESA_SECURITY_CREDENTIALS;
+      const url = "https://sandbox.safaricom.co.ke/mpesa/b2c/v3/paymentrequest";
+      const auth = "Bearer " + accessToken;
 
-        request({
-          url,
-          method: "POST",
-          headers: {
-            Authorization: auth,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          json: {
-            InitiatorName: "testapi",
-            OriginatorConversationID: "f6978aaa-ee73-4831-8da4-5dd9287e4202",                          //conversion id
-            SecurityCredential: securityCredential,
-            CommandID: "BusinessPayment",
-            Amount: 1,
-            PartyA: process.env.MPESA_SHORTCODE,
-            PartyB: "254793786072",
-            PhoneNumber: "254793786072",
-            Remarks: "Test B2C Payment",
-            Occasion: "Test",
-            QueueTimeOutURL: process.env.NGROK_URL + "/queue_timeout",
-            ResultURL: process.env.NGROK_URL + "/result",
-            CallBackURL: process.env.MPESA_CALLBACK_URL,
-            AccountReference: "Daraja api test",
-            TransactionDesc: "Testing Api"
-          }
+      request({
+        url,
+        method: "POST",
+        headers: {
+          Authorization: auth,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
+        json: {
+          InitiatorName: "testapi",
+          OriginatorConversationID: "f6978aaa-ee73-4831-8da4-5dd9287e4202",                          //conversion id
+          SecurityCredential: securityCredential,
+          CommandID: "BusinessPayment",
+          Amount: 1,
+          PartyA: process.env.MPESA_SHORTCODE,
+          PartyB: "254793786072",
+          PhoneNumber: "254793786072",
+          Remarks: "Test B2C Payment",
+          Occasion: "Test",
+          QueueTimeOutURL: process.env.NGROK_URL + "/queue_timeout",
+          ResultURL: process.env.NGROK_URL + "/result",
+          CallBackURL: process.env.MPESA_CALLBACK_URL,
+          AccountReference: "Daraja api test",
+          TransactionDesc: "Testing Api"
+        }
+      },
         (error, response, body) => {
           if (error) {
             console.error("B2C Request Error:", error);

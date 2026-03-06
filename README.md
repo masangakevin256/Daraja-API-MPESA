@@ -86,6 +86,218 @@ MPESA_SECURITY_CREDENTIALS=your_security_credential
 | `POST` | `/validation` | Webhook for C2B Validation. |
 | `POST` | `/api/mpesa/callback` | Webhook for STK Push results. |
 
+
+---
+
+# MPESA Callback Flow (Simple Explanation)
+
+This document explains **how MPESA communicates with your server** when someone makes a payment using your **Paybill or Till Number**.
+
+---
+
+## 1. User Initiates Payment
+
+A customer goes to **M-PESA** and enters:
+
+- Paybill Number (e.g., `600996`)
+- Account Number
+- Amount
+- M-PESA PIN
+
+Then they press **Send**.
+
+At this point, the request is handled by **Safaricom's MPESA servers**.
+
+---
+
+## 2. Safaricom Processes the Payment
+
+Safaricom:
+
+1. Validates the transaction
+2. Deducts the money from the user's account
+3. Confirms the transaction internally
+
+After that, Safaricom needs to **notify your system** about the transaction.
+
+---
+
+## 3. Safaricom Sends Data to Your Server
+
+Safaricom sends an **HTTP POST request** to the callback URL you registered.
+
+Example callback URL:
+
+```
+https://yourdomain.com/mpesa/callback
+```
+
+Safaricom sends transaction details like:
+
+- Transaction ID
+- Amount
+- Phone number
+- Paybill
+- Account reference
+- Transaction time
+
+Example JSON sent to your server:
+
+```json
+{
+  "TransactionType": "Pay Bill",
+  "TransID": "RKTQDM7W6S",
+  "TransTime": "20260306123045",
+  "TransAmount": "1000",
+  "BusinessShortCode": "600996",
+  "BillRefNumber": "INV001",
+  "MSISDN": "254712345678"
+}
+```
+
+---
+
+## 4. Your Server Receives the Callback
+
+Your backend must have an endpoint to receive the request.
+
+Example (Node.js + Express):
+
+```javascript
+app.post("/mpesa/callback", (req, res) => {
+    console.log("MPESA Callback:", req.body);
+
+    // Save transaction to database
+    // Update user wallet
+    // Confirm order
+
+    res.status(200).json({ message: "Callback received successfully" });
+});
+```
+
+---
+
+## 5. Your System Processes the Payment
+
+After receiving the callback, your system can:
+
+- Save the transaction
+- Activate a wallet
+- Confirm a purchase
+- Update a database
+- Send a receipt
+
+This is where **your business logic happens**.
+
+---
+
+## 6. Important: Registering the Callback URL
+
+Safaricom must know **where to send the payment data**.
+
+You register your callback URL using the **Register URL API**.
+
+Example:
+
+```
+POST /mpesa/c2b/v1/registerurl
+```
+
+You provide:
+
+- Confirmation URL
+- Validation URL
+- Shortcode
+
+Example:
+
+```json
+{
+  "ShortCode": "600996",
+  "ResponseType": "Completed",
+  "ConfirmationURL": "https://yourdomain.com/mpesa/confirmation",
+  "ValidationURL": "https://yourdomain.com/mpesa/validation"
+}
+```
+
+---
+
+## 7. Summary (Full Flow)
+
+1. User pays using MPESA
+2. Safaricom processes payment
+3. Safaricom calls your **callback URL**
+4. Your server receives transaction data
+5. Your system processes the payment
+
+Flow diagram:
+
+```
+User Phone
+    │
+    ▼
+MPESA (Safaricom)
+    │
+    ▼
+Your Registered Callback URL
+    │
+    ▼
+Your Backend Server
+    │
+    ▼
+Database / Business Logic
+```
+
+---
+
+## 8. Development Tip
+
+During development, your local server is not public.
+
+You can use **ngrok** to expose it:
+
+```
+ngrok http 3000
+```
+
+Example public URL:
+
+```
+https://abc123.ngrok.io/mpesa/callback
+```
+
+Safaricom can now reach your local server.
+
+---
+
+## 9. Production Setup
+
+In production, you should use:
+
+- A real domain
+- HTTPS
+- A hosted server (VPS / cloud)
+
+Example production URL:
+
+```
+https://api.yourdomain.com/mpesa/callback
+```
+
+---
+
+## Key Idea
+
+MPESA **does not wait for you to ask for the payment details**.
+
+Instead:
+
+> Safaricom **pushes the payment information to your server automatically** using the callback URL you registered.
+
+```
+Safaricom → Your Server → Your Database
+```
+
 ---
 
 ## 🤝 Contributing
